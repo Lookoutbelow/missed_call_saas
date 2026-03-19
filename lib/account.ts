@@ -1,4 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/database.types";
+
+type AccountRow = Database["public"]["Tables"]["accounts"]["Row"];
+type CurrentAccount = Pick<
+  AccountRow,
+  | "id"
+  | "business_name"
+  | "owner_name"
+  | "email"
+  | "business_phone"
+  | "timezone"
+  | "twilio_phone_number"
+  | "plan_tier"
+  | "office_hours_json"
+>;
 
 export async function getCurrentUser() {
   const supabase = await createClient();
@@ -9,7 +24,7 @@ export async function getCurrentUser() {
   return user ?? null;
 }
 
-export async function getCurrentAccount() {
+export async function getCurrentAccount(): Promise<CurrentAccount | null> {
   const supabase = await createClient();
   const {
     data: { user }
@@ -29,5 +44,5 @@ export async function getCurrentAccount() {
     throw error;
   }
 
-  return data;
+  return data as CurrentAccount | null;
 }
