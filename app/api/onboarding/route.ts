@@ -103,9 +103,11 @@ export async function POST(request: NextRequest) {
       throw accountError;
     }
 
+    const accountId = (account as { id: string }).id;
+
     try {
       const { error: notificationsError } = await supabase.from("notification_settings").insert({
-        account_id: account.id,
+        account_id: accountId,
         notify_email: email,
         notify_sms_number: phone,
         notification_emails: [email],
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest) {
 
       const { error: templatesError } = await supabase.from("templates").insert(
         DEFAULT_TEMPLATES.map((template) => ({
-          account_id: account.id,
+          account_id: accountId,
           name: template.name,
           template_type: template.template_type,
           body: template.body,
@@ -130,14 +132,14 @@ export async function POST(request: NextRequest) {
         throw templatesError;
       }
     } catch (error) {
-      await supabase.from("accounts").delete().eq("id", account.id);
+      await supabase.from("accounts").delete().eq("id", accountId);
       throw error;
     }
 
     return NextResponse.json(
       {
         ok: true,
-        accountId: account.id
+        accountId
       },
       { status: 201 }
     );
