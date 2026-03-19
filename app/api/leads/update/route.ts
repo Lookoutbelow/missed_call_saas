@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCurrentAccount, getCurrentUser } from "@/lib/account";
+import type { Database } from "@/lib/database.types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -32,18 +33,20 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
+    const leadUpdate: Database["public"]["Tables"]["leads"]["Update"] = {
+      customer_name: payload.customerName.trim(),
+      issue_type: payload.issueType?.trim() || null,
+      address: payload.address?.trim() || null,
+      urgency: payload.urgency,
+      callback_preference: payload.callbackPreference?.trim() || null,
+      status: payload.status,
+      notes: payload.notes?.trim() || null,
+      updated_at: new Date().toISOString()
+    };
+
     const { data, error } = await supabase
       .from("leads")
-      .update({
-        customer_name: payload.customerName.trim(),
-        issue_type: payload.issueType?.trim() || null,
-        address: payload.address?.trim() || null,
-        urgency: payload.urgency,
-        callback_preference: payload.callbackPreference?.trim() || null,
-        status: payload.status,
-        notes: payload.notes?.trim() || null,
-        updated_at: new Date().toISOString()
-      })
+      .update(leadUpdate)
       .eq("account_id", account.id)
       .eq("id", leadId)
       .select("id, customer_name, customer_phone, issue_type, address, urgency, callback_preference, status, notes, updated_at")
