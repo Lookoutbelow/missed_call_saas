@@ -71,12 +71,15 @@ function updateConversationList(
 export function InboxWorkspace({ initialConversations, initialDetail }: InboxWorkspaceProps) {
   const router = useRouter();
   const [conversations, setConversations] = useState(initialConversations);
-  const [selectedConversationId, setSelectedConversationId] = useState(initialDetail?.conversation.id ?? initialConversations[0]?.id ?? null);
+  const [selectedConversationId, setSelectedConversationId] = useState(
+    initialDetail?.conversation.id ?? initialConversations[0]?.id ?? null
+  );
   const [detail, setDetail] = useState<InboxConversationDetail | null>(initialDetail);
   const [isLoading, setIsLoading] = useState(false);
   const [composer, setComposer] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+
   useEffect(() => {
     if (!selectedConversationId) {
       return;
@@ -196,8 +199,8 @@ export function InboxWorkspace({ initialConversations, initialDetail }: InboxWor
           setDetail((current) =>
             current && current.conversation.id === selectedConversationId
               ? {
-                ...current,
-                conversation: previousDetail.conversation,
+                  ...current,
+                  conversation: previousDetail.conversation,
                   messages: current.messages
                     .filter((message) => message.id !== optimisticMessage.id)
                     .concat(payload.message)
@@ -217,25 +220,28 @@ export function InboxWorkspace({ initialConversations, initialDetail }: InboxWor
         throw new Error("Failed to send reply.");
       }
 
+      const confirmedMessage = payload.message;
+      const confirmedLatestMessageAt = payload.latestMessageAt;
+
       setDetail((current) =>
         current && current.conversation.id === selectedConversationId
           ? {
               ...current,
               conversation: {
                 ...current.conversation,
-                latestMessagePreview: payload.message.body,
-                lastMessageAt: payload.latestMessageAt
+                latestMessagePreview: confirmedMessage.body,
+                lastMessageAt: confirmedLatestMessageAt
               },
               messages: current.messages
                 .filter((message) => message.id !== optimisticMessage.id)
-                .concat(payload.message)
+                .concat(confirmedMessage)
             }
           : current
       );
       setConversations((current) =>
         updateConversationList(current, selectedConversationId, {
-          latestMessagePreview: payload.message.body,
-          lastMessageAt: payload.latestMessageAt
+          latestMessagePreview: confirmedMessage.body,
+          lastMessageAt: confirmedLatestMessageAt
         })
       );
       router.refresh();
