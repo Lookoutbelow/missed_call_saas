@@ -194,6 +194,7 @@ export function InboxWorkspace({ initialConversations, initialDetail }: InboxWor
 
       if (!response.ok) {
         if (payload.message) {
+          const failedMessage = payload.message;
           preserveFailedMessage = true;
           setConversations(previousConversations);
           setDetail((current) =>
@@ -203,7 +204,7 @@ export function InboxWorkspace({ initialConversations, initialDetail }: InboxWor
                   conversation: previousDetail.conversation,
                   messages: current.messages
                     .filter((message) => message.id !== optimisticMessage.id)
-                    .concat(payload.message)
+                    .concat(failedMessage)
                 }
               : current
           );
