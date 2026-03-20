@@ -127,7 +127,8 @@ export function InboxWorkspace({ initialConversations, initialDetail }: InboxWor
     };
   }, [detail?.conversation.id, selectedConversationId]);
 
-  const displayedMessages = detail?.messages ?? [];
+    const displayedMessages = (detail?.messages ?? []) as PendingMessage[];
+
 
   async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
