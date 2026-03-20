@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
     const now = new Date().toISOString();
 
-    const { error: accountError } = await supabase
-      .from("accounts")
+    const accountsQuery = supabase.from("accounts") as any;
+    const { error: accountError } = await accountsQuery
       .update({
         business_name: businessInfo.businessName.trim(),
         owner_name: businessInfo.ownerName.trim(),
@@ -91,7 +91,8 @@ export async function POST(request: NextRequest) {
       throw accountError;
     }
 
-    const { error: notificationError } = await supabase.from("notification_settings").upsert(
+    const notificationSettingsQuery = supabase.from("notification_settings") as any;
+    const { error: notificationError } = await notificationSettingsQuery.upsert(
       {
         account_id: account.id,
         notify_email: notifications.notifyEmail.trim() || null,
@@ -109,8 +110,9 @@ export async function POST(request: NextRequest) {
 
     for (const templateDefinition of REQUIRED_TEMPLATE_TYPES) {
       const templateValue = templates[templateDefinition.key].trim();
-      const { data: existingTemplate, error: templateLookupError } = await supabase
-        .from("templates")
+      const templatesQuery = supabase.from("templates") as any;
+
+      const { data: existingTemplate, error: templateLookupError } = await templatesQuery
         .select("id")
         .eq("account_id", account.id)
         .eq("template_type", templateDefinition.templateType)
@@ -124,8 +126,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (existingTemplate) {
-        const { error: updateTemplateError } = await supabase
-          .from("templates")
+        const { error: updateTemplateError } = await templatesQuery
           .update({
             name: templateDefinition.name,
             body: templateValue,
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
           throw updateTemplateError;
         }
       } else {
-        const { error: insertTemplateError } = await supabase.from("templates").insert({
+        const { error: insertTemplateError } = await templatesQuery.insert({
           account_id: account.id,
           name: templateDefinition.name,
           template_type: templateDefinition.templateType,
