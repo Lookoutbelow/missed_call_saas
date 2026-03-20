@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
       slug = `${baseSlug}-${attempt}`;
     }
 
-    const { data: account, error: accountError } = await supabase
-      .from("accounts")
+    const accountsQuery = supabase.from("accounts") as any;
+    const { data: account, error: accountError } = await accountsQuery
       .insert({
         owner_user_id: user.id,
         business_name: businessName,
@@ -103,10 +103,11 @@ export async function POST(request: NextRequest) {
       throw accountError;
     }
 
-    const accountId = (account as { id: string }).id;
+    const accountId = account.id as string;
 
     try {
-      const { error: notificationsError } = await supabase.from("notification_settings").insert({
+      const notificationSettingsQuery = supabase.from("notification_settings") as any;
+      const { error: notificationsError } = await notificationSettingsQuery.insert({
         account_id: accountId,
         notify_email: email,
         notify_sms_number: phone,
@@ -118,7 +119,8 @@ export async function POST(request: NextRequest) {
         throw notificationsError;
       }
 
-      const { error: templatesError } = await supabase.from("templates").insert(
+      const templatesQuery = supabase.from("templates") as any;
+      const { error: templatesError } = await templatesQuery.insert(
         DEFAULT_TEMPLATES.map((template) => ({
           account_id: accountId,
           name: template.name,
@@ -132,7 +134,8 @@ export async function POST(request: NextRequest) {
         throw templatesError;
       }
     } catch (error) {
-      await supabase.from("accounts").delete().eq("id", accountId);
+      const deleteAccountsQuery = supabase.from("accounts") as any;
+      await deleteAccountsQuery.delete().eq("id", accountId);
       throw error;
     }
 
