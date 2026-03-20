@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCurrentAccount, getCurrentUser } from "@/lib/account";
-import type { Database } from "@/lib/database.types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    const leadUpdate: Database["public"]["Tables"]["leads"]["Update"] = {
+    const leadUpdate = {
       customer_name: payload.customerName.trim(),
       issue_type: payload.issueType?.trim() || null,
       address: payload.address?.trim() || null,
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
     };
 
     const { data, error } = await supabase
-      .from("leads")
+      .from("leads" as never)
       .update(leadUpdate)
       .eq("account_id", account.id)
       .eq("id", leadId)
