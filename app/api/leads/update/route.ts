@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
-    const { data, error } = await supabase
-      .from("leads" as never)
+    const leadsQuery = supabase.from("leads") as any;
+    const { data, error } = await leadsQuery
       .update(leadUpdate)
       .eq("account_id", account.id)
       .eq("id", leadId)
