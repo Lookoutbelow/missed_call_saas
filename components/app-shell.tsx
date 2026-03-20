@@ -1,7 +1,17 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import type { Route } from "next";
 
-import { navItems } from "@/lib/data";
+const navItems: Array<{
+  href: Route;
+  label: string;
+  description: string;
+}> = [
+  { href: "/dashboard", label: "Dashboard", description: "Ops snapshot" },
+  { href: "/inbox", label: "Inbox", description: "Live text threads" },
+  { href: "/leads", label: "Leads", description: "New opportunities" },
+  { href: "/settings", label: "Settings", description: "Routing and team" }
+];
 
 export function AppShell({
   children,
